@@ -14,6 +14,14 @@
             <p class="error">{{ error }}</p>
         {% endif %}
 
+        {% if messages %}
+            {% for message in messages %}
+                <div class="success-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <form method="POST">
 
             {% csrf_token %}

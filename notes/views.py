@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import Note
 import re
+from django.contrib import messages
 
 @login_required
 def home(request):
@@ -111,6 +112,10 @@ def register(request):
         User.objects.create_user(
             username=username,
             password=password
+        )
+        messages.success(
+            request,
+            'Registration successful! You can now login.'
         )
 
         return redirect('login')
