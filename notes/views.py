@@ -2,10 +2,28 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from .models import Note
 
 @login_required
 def home(request):
-    return render(request, 'notes/home.html')
+    notes= Note.objects.filter(user=request.user)
+    return render(request, 'notes/home.html', {'notes': notes})
+
+@login_required
+def create_note(request):
+    if request.method == 'POST':
+        title = request.POST['title']
+        content = request.POST['content']
+
+        Note.objects.create(
+            user=request.user,
+            title=title,
+            content=content
+        )
+
+        return redirect('home')
+
+    return render(request, 'notes/create_note.html')
 
 def register(request):
     if request.method == 'POST':
