@@ -14,6 +14,10 @@
 
             {% csrf_token %}
 
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+
             <label for="username">Username</label>
 
             <input
@@ -27,12 +31,37 @@
 
             <label for="password">Password</label>
 
-            <input
-                type="password"
-                id="password"
-                name="password"
-                required
-            >
+            <div class="password-input-container">
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                >
+
+                <button
+                    type="button"
+                    id="toggle-password"
+                    class="toggle-password">
+                    Show
+                </button>
+
+            </div>
+
+            <div class="password-requirements">
+
+                <p>Password must contain:</p>
+
+                <ul>
+                    <li id="length">✗ At least 8 characters</li>
+                    <li id="uppercase">✗ One uppercase letter</li>
+                    <li id="lowercase">✗ One lowercase letter</li>
+                    <li id="number">✗ One number</li>
+                    <li id="special">✗ One special character</li>
+                </ul>
+
+            </div>
 
             <br><br>
 
@@ -50,5 +79,82 @@
     </div>
 
 </div>
+
+<script>
+    const passwordInput = document.getElementById("password");
+
+    const lengthRequirement = document.getElementById("length");
+    const uppercaseRequirement = document.getElementById("uppercase");
+    const lowercaseRequirement = document.getElementById("lowercase");
+    const numberRequirement = document.getElementById("number");
+    const specialRequirement = document.getElementById("special");
+    const togglePassword = document.getElementById("toggle-password");
+
+    togglePassword.addEventListener("click", function () {
+
+        if (passwordInput.type === "password") {
+
+            passwordInput.type = "text";
+            togglePassword.textContent = "Hide";
+
+        } else {
+
+            passwordInput.type = "password";
+            togglePassword.textContent = "Show";
+
+        }
+
+    });
+
+
+        passwordInput.addEventListener("input", function () {
+
+            const password = passwordInput.value;
+
+
+        // Regex checks
+
+        const hasLength = /^.{8,}$/.test(password);
+
+        const hasUppercase = /[A-Z]/.test(password);
+
+        const hasLowercase = /[a-z]/.test(password);
+
+        const hasNumber = /[0-9]/.test(password);
+
+        const hasSpecial = /[@$!%*?&]/.test(password);
+
+
+        // Update checklist
+
+        updateRequirement(lengthRequirement, hasLength);
+
+        updateRequirement(uppercaseRequirement, hasUppercase);
+
+        updateRequirement(lowercaseRequirement, hasLowercase);
+
+        updateRequirement(numberRequirement, hasNumber);
+
+        updateRequirement(specialRequirement, hasSpecial);
+
+    });
+
+
+    function updateRequirement(element, isValid) {
+
+        if (isValid) {
+
+            element.textContent =
+                "✓ " + element.textContent.substring(2);
+
+        } else {
+
+            element.textContent =
+                "✗ " + element.textContent.substring(2);
+
+        }
+
+    }
+</script>
 
 {% endblock %}

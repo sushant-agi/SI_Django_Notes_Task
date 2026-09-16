@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .models import Note
+import re
 
 @login_required
 def home(request):
@@ -79,12 +80,40 @@ def register(request):
         username = request.POST['username']
         password = request.POST['password']
 
+        password_pattern = (
+            r'^(?=.*[a-z])'
+            r'(?=.*[A-Z])'
+            r'(?=.*\d)'
+            r'(?=.*[@$!%*?&])'
+            r'.{8,}$'
+        )
+
+        if not re.fullmatch(password_pattern, password):
+
+            return render(
+                request,
+                'notes/register.html',
+                {
+                    'error': 'Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.'
+                }
+            )
+
+        if User.objects.filter(username=username).exists():
+
+            return render(
+                request,
+                'notes/register.html',
+                {
+                    'error': 'Username already exists.'
+                }
+            )
+
         User.objects.create_user(
             username=username,
             password=password
         )
 
-        return redirect('home')
+        return redirect('login')
 
     return render(request, 'notes/register.html')
 
