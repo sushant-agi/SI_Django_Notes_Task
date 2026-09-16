@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 
 def home(request):
     return render(request, 'notes/home.html')
@@ -40,3 +40,7 @@ def login_view(request):
             {'error': 'Invalid username or password'}
         )
     return render(request, 'notes/login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('home')
