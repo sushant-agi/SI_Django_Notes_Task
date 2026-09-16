@@ -1,38 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>My Notes</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #f5f5f5;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 16px;
+            text-decoration: none;
+            border-radius: 6px;
+            background: #333;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .notes-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .note {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .note h2 {
+            margin-top: 0;
+        }
+
+        .note-content {
+            white-space: pre-wrap;
+        }
+
+        .note-actions {
+            margin-top: 15px;
+        }
+
+        .note-actions a {
+            margin-right: 15px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 10px;
+        }
+    </style>
 </head>
 
 <body>
 
-    <h1>My Notes</h1>
+    <header>
+        <div>
+            <h1>My Notes</h1>
+            <p>Welcome, {{ user.username }}!</p>
+        </div>
 
-    <p>Welcome, {{ user.username }}!</p>
+        <div>
+            <a class="button" href="{% url 'create_note' %}">
+                + New Note
+            </a>
 
-    <a href="{% url 'create_note' %}">Create Note</a>
-    <a href="{% url 'logout' %}">Logout</a>
+            <a class="button" href="{% url 'logout' %}">
+                Logout
+            </a>
+        </div>
+    </header>
 
-    <hr>
+    <main class="notes-container">
 
-    {% for note in notes %}
+        {% for note in notes %}
 
-        <h2>{{ note.title }}</h2>
+            <article class="note">
 
-        <p>{{ note.content }}</p>
+                <h2>{{ note.title }}</h2>
 
-        <small>Created: {{ note.created_at }}</small>
-        <br><br>
-        <a href="{% url 'edit_note' note.id %}">Edit</a>
-        <a href="{% url 'delete_note' note.id %}">Delete</a>
+                <p class="note-content">
+                    {{ note.content }}
+                </p>
 
-        <hr>
+                <small>
+                    Created: {{ note.created_at|date:"M d, Y H:i" }}
+                </small>
 
-    {% empty %}
+                <div class="note-actions">
+                    <a href="{% url 'edit_note' note.id %}" class="button secondary-button">
+                        Edit
+                    </a>
 
-        <p>You don't have any notes yet.</p>
+                    <a href="{% url 'delete_note' note.id %}" class="button danger-button">
+                        Delete
+                    </a>
+                </div>
 
-    {% endfor %}
+            </article>
+
+        {% empty %}
+
+            <div class="empty">
+                <h2>No notes yet</h2>
+                <p>Create your first note to get started.</p>
+
+                <a class="button" href="{% url 'create_note' %}">
+                    Create Note
+                </a>
+            </div>
+
+        {% endfor %}
+
+    </main>
 
 </body>
 </html>

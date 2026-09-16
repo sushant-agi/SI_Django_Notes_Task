@@ -1,33 +1,58 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-</head>
+{% extends 'notes/base.html' %}
 
-<body>
+{% block title %}Login{% endblock %}
 
-    <h1>Login</h1>
-    {% if error %}
-    <p>{{ error }}</p>
-    {% endif %}
-    <form method="POST">
-        {% csrf_token %}
+{% block content %}
 
-        <label>Username:</label>
-        <input type="text" name="username">
+<div class="container">
 
-        <br><br>
+    <div class="card">
 
-        <label>Password:</label>
-        <input type="password" name="password">
+        <h1>Login</h1>
 
-        <br><br>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
 
-        <button type="submit">Login</button>
-    </form>
-    <p> Don't have an account? 
-    <a href="{% url 'register' %}">Register</a>
-    </p>
+        <form method="POST">
 
-</body>
-</html>
+            {% csrf_token %}
+
+            <label for="username">Username</label>
+
+            <input
+                type="text"
+                id="username"
+                name="username"
+                required
+            >
+
+            <br><br>
+
+            <label for="password">Password</label>
+
+            <input
+                type="password"
+                id="password"
+                name="password"
+                required
+            >
+
+            <br><br>
+
+            <button type="submit">
+                Login
+            </button>
+
+        </form>
+
+        <p>
+            Don't have an account?
+            <a href="{% url 'register' %}">Register</a>
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

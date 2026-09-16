@@ -1,26 +1,51 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Delete Note</title>
-</head>
-<body>
+{% extends 'notes/base.html' %}
 
-    <h1>Delete Note</h1>
+{% block title %}Delete Note{% endblock %}
 
-    <p>Are you sure you want to delete this note?</p>
+{% block content %}
 
-    <h2>{{ note.title }}</h2>
-    <p>{{ note.content }}</p>
+<div class="container">
 
-    <form method="POST">
-        {% csrf_token %}
+    <div class="card">
 
-        <button type="submit">Yes, Delete</button>
-    </form>
+        <h1>Delete Note</h1>
 
-    <br>
+        <p>
+            Are you sure you want to delete this note?
+        </p>
 
-    <a href="{% url 'home' %}">Cancel</a>
+        <h2>{{ note.title }}</h2>
 
-</body>
-</html>
+        <p>
+            {{ note.content }}
+        </p>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="form-actions">
+
+                <button
+                    type="submit"
+                    class="danger-button"
+                >
+                    Yes, Delete
+                </button>
+
+                <a
+                    href="{% url 'home' %}"
+                    class="button secondary-button"
+                >
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

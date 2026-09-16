@@ -1,32 +1,54 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register</title>
-</head>
+{% extends 'notes/base.html' %}
 
-<body>
+{% block title %}Create Account{% endblock %}
 
-    <h1>Create Account</h1>
+{% block content %}
 
-    <form method="POST">
-        {% csrf_token %}
+<div class="container">
 
-        <label>Username:</label>
-        <input type="text" name="username">
+    <div class="card">
 
-        <br><br>
+        <h1>Create Account</h1>
 
-        <label>Password:</label>
-        <input type="password" name="password">
+        <form method="POST">
 
-        <br><br>
+            {% csrf_token %}
 
-        <button type="submit">Register</button>
-    </form>
+            <label for="username">Username</label>
 
-    <p>Already have an account? 
-        <a href="{% url 'login' %}">Login</a>
-    </p>
+            <input
+                type="text"
+                id="username"
+                name="username"
+                required
+            >
 
-</body>
-</html>
+            <br><br>
+
+            <label for="password">Password</label>
+
+            <input
+                type="password"
+                id="password"
+                name="password"
+                required
+            >
+
+            <br><br>
+
+            <button type="submit">
+                Register
+            </button>
+
+        </form>
+
+        <p>
+            Already have an account?
+            <a href="{% url 'login' %}">Login</a>
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,41 +1,59 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Note</title>
-</head>
-<body>
+{% extends 'notes/base.html' %}
 
-    <h1>Edit Note</h1>
+{% block title %}Edit Note{% endblock %}
 
-    <form method="POST">
-        {% csrf_token %}
+{% block content %}
 
-        <label>Title:</label>
-        <br>
-        <input
-            type="text"
-            name="title"
-            value="{{ note.title }}"
-        >
+<div class="container">
 
-        <br><br>
+    <div class="card">
 
-        <label>Content:</label>
-        <br>
-        <textarea
-            name="content"
-            rows="10"
-            cols="50"
-        >{{ note.content }}</textarea>
+        <h1>Edit Note</h1>
 
-        <br><br>
+        <form method="POST">
 
-        <button type="submit">Update Note</button>
-    </form>
+            {% csrf_token %}
 
-    <br>
+            <label for="title">Title</label>
 
-    <a href="{% url 'home' %}">Cancel</a>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                value="{{ note.title }}"
+                required
+            >
 
-</body>
-</html>
+            <br><br>
+
+            <label for="content">Content</label>
+
+            <textarea
+                id="content"
+                name="content"
+                rows="10"
+                required
+            >{{ note.content }}</textarea>
+
+            <div class="form-actions">
+
+                <button type="submit">
+                    Update Note
+                </button>
+
+                <a
+                    href="{% url 'home' %}"
+                    class="button secondary-button"
+                >
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
