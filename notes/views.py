@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -24,6 +24,45 @@ def create_note(request):
         return redirect('home')
 
     return render(request, 'notes/create_note.html')
+
+@login_required
+def edit_note(request, pk):
+    note = get_object_or_404(
+        Note,
+        id=pk,
+        user=request.user
+    )
+
+    if request.method == 'POST':
+        note.title = request.POST['title']
+        note.content = request.POST['content']
+        note.save()
+
+        return redirect('home')
+
+    return render(
+        request,
+        'notes/edit_note.html',
+        {'note': note}
+    )
+
+@login_required
+def delete_note(request, pk):
+    note = get_object_or_404(
+        Note,
+        id=pk,
+        user=request.user
+    )
+
+    if request.method == 'POST':
+        note.delete()
+        return redirect('home')
+
+    return render(
+        request,
+        'notes/delete_note.html',
+        {'note': note}
+    )
 
 def register(request):
     if request.method == 'POST':

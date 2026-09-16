@@ -22,6 +22,9 @@
         <p>{{ note.content }}</p>
 
         <small>Created: {{ note.created_at }}</small>
+        <br><br>
+        <a href="{% url 'edit_note' note.id %}">Edit</a>
+        <a href="{% url 'delete_note' note.id %}">Delete</a>
 
         <hr>
 
