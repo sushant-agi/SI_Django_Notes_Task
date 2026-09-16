@@ -70,6 +70,17 @@
             background: white;
             border-radius: 10px;
         }
+
+        .note-image {
+            display: block;
+            max-width: 100%;
+            width: 400px;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
     </style>
 </head>
 
@@ -99,6 +110,14 @@
             <article class="note">
 
                 <h2>{{ note.title }}</h2>
+
+                {% if note.image %}
+                    <img
+                        src="{{ note.image.url }}"
+                        alt="Image attached to {{ note.title }}"
+                        style="max-width: 300px; height: auto;"
+                    >
+                {% endif %}
 
                 <p class="note-content">
                     {{ note.content }}

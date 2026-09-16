@@ -10,7 +10,7 @@
 
         <h1>Create a New Note</h1>
 
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
 
             {% csrf_token %}
 
@@ -38,6 +38,25 @@
 
             <br><br>
 
+            <label for="image">Image</label>
+
+            <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/*"
+            >
+
+            <div id="image-preview-container" style="display: none;">
+                <img id="image-preview" src="" alt="Selected image preview">
+
+                <button type="button" id="remove-image">
+                    Remove Image
+                </button>
+            </div>
+
+            <br><br>
+
             <button type="submit">
                 Save Note
             </button>
@@ -53,5 +72,31 @@
     </div>
 
 </div>
+
+
+
+<script>
+    const imageInput = document.getElementById("image");
+    const imagePreview = document.getElementById("image-preview");
+    const previewContainer = document.getElementById("image-preview-container");
+    const removeImage = document.getElementById("remove-image");
+
+    imageInput.addEventListener("change", function () {
+
+        const file = imageInput.files[0];
+
+        if (file) {
+            imagePreview.src = URL.createObjectURL(file);
+            previewContainer.style.display = "block";
+        }
+    });
+
+    removeImage.addEventListener("click", function () {
+
+        imageInput.value = "";
+        imagePreview.src = "";
+        previewContainer.style.display = "none";
+    });
+</script>
 
 {% endblock %}

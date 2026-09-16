@@ -14,11 +14,13 @@ def create_note(request):
     if request.method == 'POST':
         title = request.POST['title']
         content = request.POST['content']
+        image=request.FILES.get('image')
 
         Note.objects.create(
             user=request.user,
             title=title,
-            content=content
+            content=content,
+            image=image
         )
 
         return redirect('home')
@@ -36,6 +38,14 @@ def edit_note(request, pk):
     if request.method == 'POST':
         note.title = request.POST['title']
         note.content = request.POST['content']
+
+        if request.POST.get('remove_existing_image') == 'true':
+            note.image.delete(save=False)
+            note.image = None
+
+        if request.FILES.get('image'):
+            note.image = request.FILES.get('image')
+
         note.save()
 
         return redirect('home')

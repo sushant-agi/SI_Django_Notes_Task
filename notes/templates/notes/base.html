@@ -39,7 +39,7 @@
             font-weight: bold;
         }
 
-        input,
+        input:not([type="file"]),
         textarea {
             width: 100%;
             padding: 12px;
@@ -48,6 +48,26 @@
             border-radius: 6px;
             font-size: 16px;
             font-family: inherit;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: #fafafa;
+            font-size: 15px;
+        }
+
+        input[type="file"]::file-selector-button {
+            padding: 8px 14px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #333;
+            color: white;
+            cursor: pointer;
         }
 
         textarea {
@@ -103,6 +123,64 @@
             margin-top: 20px;
             text-decoration: none;
         }
+
+        #image-preview-container {
+        margin-top: 15px;
+        }
+
+        #image-preview {
+            display: block;
+            width: 300px;
+            max-width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        #remove-image {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 5px;
+            background: #c0392b;
+            color: white;
+            cursor: pointer;
+        }
+
+        #remove-image:hover {
+            background: #a93226;
+        }
+        #current-image-container,
+        #image-preview-container {
+            margin-top: 15px;
+        }
+
+        #current-image,
+        #image-preview {
+            display: block;
+            width: 300px;
+            max-width: 100%;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        #remove-current-image,
+        #remove-new-image {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 5px;
+            background: #c0392b;
+            color: white;
+            cursor: pointer;
+        }
+
+        #remove-current-image:hover,
+        #remove-new-image:hover {
+            background: #a93226;
+        }
+        
     </style>
 </head>
 
