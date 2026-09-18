@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import Note
+from .models import Note, Profile
 import re
 from django.contrib import messages
+from django.contrib.auth.hashers import make_password, check_password
 
 @login_required
 def home(request):
@@ -80,6 +81,8 @@ def register(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
+        security_question = request.POST['security_question']
+        security_answer = request.POST['security_answer']
 
         password_pattern = (
             r'^(?=.*[a-z])'
@@ -109,9 +112,14 @@ def register(request):
                 }
             )
 
-        User.objects.create_user(
+        user=User.objects.create_user(
             username=username,
             password=password
+        )
+        Profile.objects.create(
+            user=user,
+            security_question=security_question,
+            security_answer=make_password(security_answer)
         )
         messages.success(
             request,
@@ -147,3 +155,132 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('home')
+
+def forgot_password(request):
+
+    if request.method == 'POST':
+
+        username = request.POST['username']
+
+        try:
+            user = User.objects.get(username=username)
+            profile = Profile.objects.get(user=user)
+
+        except (User.DoesNotExist, Profile.DoesNotExist):
+            return render(
+                request,
+                'notes/forgot_password.html',
+                {'error': 'Invalid username.'}
+            )
+
+        request.session['reset_user_id'] = user.id
+
+        return render(
+            request,
+            'notes/security_question.html',
+            {'question': profile.security_question}
+        )
+
+    return render(
+        request,
+        'notes/forgot_password.html'
+    )
+
+def verify_security_answer(request):
+
+    if request.method != 'POST':
+        return redirect('forgot_password')
+
+    user_id = request.session.get('reset_user_id')
+
+    if not user_id:
+        return redirect('forgot_password')
+
+    try:
+        user = User.objects.get(id=user_id)
+        profile = Profile.objects.get(user=user)
+
+    except (User.DoesNotExist, Profile.DoesNotExist):
+        return redirect('forgot_password')
+
+    answer = request.POST['security_answer']
+
+    if not check_password(answer, profile.security_answer):
+        return render(
+            request,
+            'notes/security_question.html',
+            {
+                'question': profile.security_question,
+                'error': 'Incorrect answer. Please try again.'
+            }
+        )
+
+    request.session['password_reset_verified'] = True
+
+    return redirect('reset_password')
+
+def reset_password(request):
+
+    if not request.session.get('password_reset_verified'):
+        return redirect('forgot_password')
+
+    user_id = request.session.get('reset_user_id')
+
+    if not user_id:
+        return redirect('forgot_password')
+
+    try:
+        user = User.objects.get(id=user_id)
+
+    except User.DoesNotExist:
+        return redirect('forgot_password')
+
+    if request.method == 'POST':
+
+        new_password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
+        password_pattern = (
+            r'^(?=.*[a-z])'
+            r'(?=.*[A-Z])'
+            r'(?=.*\d)'
+            r'(?=.*[@$!%*?&])'
+            r'.{8,}$'
+        )
+
+        if not re.match(password_pattern, new_password):
+            return render(
+                request,
+                'notes/reset_password.html',
+                {
+                    'error': (
+                        'Password must be at least 8 characters long and contain '
+                        'at least one uppercase letter, lowercase letter, number, '
+                        'and special character (@$!%*?&).'
+                    )
+                }
+            )
+
+        if new_password != confirm_password:
+            return render(
+                request,
+                'notes/reset_password.html',
+                {'error': 'Passwords do not match.'}
+            )
+
+        user.set_password(new_password)
+        user.save()
+
+        request.session.pop('reset_user_id', None)
+        request.session.pop('password_reset_verified', None)
+
+        messages.success(
+            request,
+            'Password reset successful! You can now log in.'
+        )
+
+        return redirect('login')
+
+    return render(
+        request,
+        'notes/reset_password.html'
+    )

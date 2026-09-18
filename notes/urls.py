@@ -9,4 +9,7 @@ urlpatterns = [
     path('create/', views.create_note, name='create_note'),
     path('edit/<int:pk>/', views.edit_note, name='edit_note'),
     path('delete/<int:pk>/', views.delete_note, name='delete_note'),
+    path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('verify-security-answer/', views.verify_security_answer, name='verify_security_answer'),
+    path('reset-password/', views.reset_password, name='reset_password'),
 ]
