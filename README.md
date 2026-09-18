@@ -147,6 +147,33 @@ pip install -r requirements.txt
 sudo systemctl restart notes
 ```
 
+## REST API
+
+The project includes a REST API built using **Django REST Framework (DRF)** with **JWT authentication**.
+
+### API Endpoints
+
+| Method | Endpoint | Description | Authentication |
+|---|---|---|---|
+| POST | `/api/register/` | Register a new user | No |
+| POST | `/api/token/` | Obtain JWT access and refresh tokens | No |
+| POST | `/api/token/refresh/` | Generate a new access token | No |
+| GET | `/api/notes/` | Get the logged-in user's notes | JWT |
+| POST | `/api/notes/` | Create a new note | JWT |
+| GET | `/api/notes/<id>/` | Get a specific note | JWT |
+| PUT | `/api/notes/<id>/` | Update a note | JWT |
+| PATCH | `/api/notes/<id>/` | Partially update a note | JWT |
+| DELETE | `/api/notes/<id>/` | Delete a note | JWT |
+
+### Authentication
+
+The API uses **JWT (JSON Web Token)** authentication.
+
+After logging in through `/api/token/`, include the access token in the request header:
+
+```text
+Authorization: Bearer <access_token>
+
 ## Security Notes
 
 - Keep `.env` out of version control.
