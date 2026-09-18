@@ -88,7 +88,7 @@ def register(request):
             r'^(?=.*[a-z])'
             r'(?=.*[A-Z])'
             r'(?=.*\d)'
-            r'(?=.*[@$!%*?&])'
+            r'(?=.*[@$!%*?&#])'
             r'.{8,}$'
         )
 
@@ -243,7 +243,7 @@ def reset_password(request):
             r'^(?=.*[a-z])'
             r'(?=.*[A-Z])'
             r'(?=.*\d)'
-            r'(?=.*[@$!%*?&])'
+            r'(?=.*[@$!%*?&#])'
             r'.{8,}$'
         )
 
@@ -255,7 +255,7 @@ def reset_password(request):
                     'error': (
                         'Password must be at least 8 characters long and contain '
                         'at least one uppercase letter, lowercase letter, number, '
-                        'and special character (@$!%*?&).'
+                        'and special character (@$!%*?&#).'
                     )
                 }
             )
