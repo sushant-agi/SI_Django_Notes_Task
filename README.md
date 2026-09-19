@@ -158,6 +158,7 @@ The project includes a REST API built using **Django REST Framework (DRF)** with
 | POST | `/api/register/` | Register a new user | No |
 | POST | `/api/token/` | Obtain JWT access and refresh tokens | No |
 | POST | `/api/token/refresh/` | Generate a new access token | No |
+| POST | `/api/token/logout/` | Logs out the user, blacklisting the refresh token | No |
 | GET | `/api/notes/` | Get the logged-in user's notes | JWT |
 | POST | `/api/notes/` | Create a new note | JWT |
 | GET | `/api/notes/<id>/` | Get a specific note | JWT |
@@ -173,6 +174,7 @@ After logging in through `/api/token/`, include the access token in the request 
 
 ```text
 Authorization: Bearer <access_token>
+```
 
 ## Security Notes
 

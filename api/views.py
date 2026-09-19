@@ -1,5 +1,7 @@
 from rest_framework import generics, viewsets
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from notes.models import Note
 
@@ -27,3 +29,33 @@ class NoteViewSet(viewsets.ModelViewSet):
         serializer.save(
             user=self.request.user
         )
+
+
+class LogoutAPIView(generics.GenericAPIView):
+    
+    permission_classes = []
+
+    def post(self, request):
+
+        refresh_token = request.data.get('refresh')
+
+        if not refresh_token:
+            return Response(
+                {'error': 'Refresh token is required.'},
+                status=400
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(
+                {'message': 'Logout successful.'},
+                status=200
+            )
+
+        except Exception:
+            return Response(
+                {'error': 'Invalid or expired refresh token.'},
+                status=400
+            )
