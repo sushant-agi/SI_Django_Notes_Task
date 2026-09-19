@@ -48,9 +48,11 @@ STORAGES = {
 }
 
 ALLOWED_HOSTS = [
+    'dev-sushant.me',
+    '://dev-sushant.me',
     '127.0.0.1',
     'localhost',
-    '13.60.237.46',
+    '13.60.125.176',
 ]
 
 if os.environ.get('RENDER_EXTERNAL_HOSTNAME'):
