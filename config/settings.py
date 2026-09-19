@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     'storages',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_spectacular',
     'api',
 ]
 
@@ -170,4 +171,12 @@ REST_FRAMEWORK={
     (
     'rest_framework_simplejwt.authentication.JWTAuthentication',
         ),
+    
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'SI Django Notes API',
+    'DESCRIPTION': 'API documentation for the Django Notes application.',
+    'VERSION': '1.0.0',
 }
