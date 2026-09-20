@@ -122,7 +122,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        default=(
+            f"postgresql://"
+            f"{os.getenv('POSTGRES_USER')}:"
+            f"{os.getenv('POSTGRES_PASSWORD')}@"
+            f"{os.getenv('DATABASE_HOST', 'localhost')}:"
+            f"{os.getenv('DATABASE_PORT', '5432')}/"
+            f"{os.getenv('POSTGRES_DB')}"
+        ),
         conn_max_age=600,
         conn_health_checks=True,
     )
