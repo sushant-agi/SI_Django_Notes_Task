@@ -19,6 +19,8 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.mail import send_mail
 
+from django.core.cache import cache
+
 
 class RegisterAPIView(APIView):
 
@@ -112,6 +114,16 @@ class NoteListCreateAPIView(APIView):
 
     def get(self, request):
 
+        cache_key = f"notes:user:{request.user.id}"
+
+        cached_notes = cache.get(cache_key)
+
+        if cached_notes is not None:
+            return Response(
+                cached_notes,
+                status=status.HTTP_200_OK
+            )
+
         notes = Note.objects.filter(
             user=request.user
         )
@@ -119,6 +131,12 @@ class NoteListCreateAPIView(APIView):
         serializer = NoteSerializer(
             notes,
             many=True
+        )
+
+        cache.set(
+            cache_key,
+            serializer.data,
+            timeout=300
         )
 
         return Response(
@@ -181,6 +199,9 @@ class NoteListCreateAPIView(APIView):
             serializer.save(
                 user=request.user
             )
+
+            cache_key = f"notes:user:{request.user.id}"
+            cache.delete(cache_key)
 
             return Response(
                 serializer.data,
@@ -270,6 +291,9 @@ class NoteDetailAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
 
+            cache_key = f"notes:user:{request.user.id}"
+            cache.delete(cache_key)
+
             return Response(
                 serializer.data,
                 status=status.HTTP_200_OK
@@ -343,6 +367,9 @@ class NoteDetailAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
 
+            cache_key = f"notes:user:{request.user.id}"
+            cache.delete(cache_key)
+
             return Response(
                 serializer.data,
                 status=status.HTTP_200_OK
@@ -381,6 +408,9 @@ class NoteDetailAPIView(APIView):
         )
 
         note.delete()
+
+        cache_key = f"notes:user:{request.user.id}"
+        cache.delete(cache_key)
 
         return Response(
             status=status.HTTP_204_NO_CONTENT
