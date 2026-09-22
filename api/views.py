@@ -19,7 +19,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.mail import send_mail
 
-from django.core.cache import cache
+from .redis_utils import is_rate_limited
 
 
 class RegisterAPIView(APIView):
@@ -532,6 +532,25 @@ class ForgotPasswordAPIView(APIView):
         description='Send a password-reset OTP to the registered email address.'
     )
     def post(self, request):
+
+        client_ip = request.META.get(
+            'REMOTE_ADDR',
+            'unknown'
+        )
+
+        rate_limit_key = f"forgot_password_rate:{client_ip}"
+
+        if is_rate_limited(
+            rate_limit_key,
+            limit=5,
+            window=900
+        ):
+            return Response(
+                {
+                    'error': 'Too many password reset requests. Please try again later.'
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
         serializer = ForgotPasswordSerializer(data=request.data)
 
         if not serializer.is_valid():
