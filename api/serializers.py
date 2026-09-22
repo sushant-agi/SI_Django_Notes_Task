@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from notes.models import Note
 from django.core.validators import RegexValidator
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 username_validator = RegexValidator(
     regex=r'^[a-zA-Z0-9_]{3,30}$',
@@ -93,3 +94,22 @@ class ResetPasswordSerializer(serializers.Serializer):
         write_only=True,
         validators=[password_validator]
 )
+
+class NotePaginationSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
+    next = serializers.URLField(
+        allow_null=True
+    )
+    previous = serializers.URLField(
+        allow_null=True
+    )
+    results = NoteSerializer(
+        many=True
+    )
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        return token

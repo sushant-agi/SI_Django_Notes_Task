@@ -9,9 +9,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from notes.models import Note
 
-from .serializers import RegisterSerializer, NoteSerializer, ForgotPasswordSerializer, ResetPasswordSerializer, VerifyOTPSerializer
-
-from drf_spectacular.utils import ( OpenApiExample, OpenApiResponse, extend_schema) 
+from .serializers import RegisterSerializer, NoteSerializer, NotePaginationSerializer, ForgotPasswordSerializer, ResetPasswordSerializer, VerifyOTPSerializer
+from .serializers import CustomTokenObtainPairSerializer
+from drf_spectacular.utils import ( OpenApiExample, OpenApiResponse, extend_schema, OpenApiParameter, OpenApiTypes) 
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 import secrets
 
@@ -20,6 +21,8 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 
 from .redis_utils import is_rate_limited
+
+from .pagination import NotePagination
 
 
 class RegisterAPIView(APIView):
@@ -90,22 +93,51 @@ class NoteListCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='page',
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description='Page number.',
+                required=False,
+            ),
+            OpenApiParameter(
+                name='page_size',
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description='Number of notes per page. Maximum: 20.',
+                required=False,
+            ),
+        ],
         responses={
-            200: NoteSerializer(many=True),
+            200: NotePaginationSerializer,
         },
         examples=[
             OpenApiExample(
                 'Notes List Response',
-                value=[
-                    {
-                        'id': 1,
-                        'title': 'My First Note',
-                        'content': 'This is my first note.',
-                        'image': None,
-                        'created_at': '2026-09-20T10:00:00Z',
-                        'updated_at': '2026-09-20T10:00:00Z'
-                    }
-                ],
+                value={
+                    'count': 2,
+                    'next': 'http://127.0.0.1:8000/api/notes/?page=2',
+                    'previous': None,
+                    'results': [
+                        {
+                            'id': 2,
+                            'title': 'My First Note',
+                            'content': 'This is my first note.',
+                            'image': None,
+                            'created_at': '2026-09-20T12:32:13Z',
+                            'updated_at': '2026-09-20T12:32:13Z'
+                        },
+                        {
+                            'id': 1,
+                            'title': 'Another Note',
+                            'content': 'This is another note.',
+                            'image': None,
+                            'created_at': '2026-09-19T10:00:00Z',
+                            'updated_at': '2026-09-19T10:00:00Z'
+                        }
+                    ]
+                },
                 response_only=True,
                 status_codes=['200'],
             ),
@@ -114,7 +146,17 @@ class NoteListCreateAPIView(APIView):
 
     def get(self, request):
 
-        cache_key = f"notes:user:{request.user.id}"
+        cache_version_key = f"notes:version:user:{request.user.id}"
+
+        version = cache.get(cache_version_key, 1)
+
+        page_number = request.query_params.get("page", "1")
+        page_size = request.query_params.get("page_size", "5")
+
+        cache_key = (
+            f"notes:user:{request.user.id}:"
+            f"v:{version}:page:{page_number}:size:{page_size}"
+)
 
         cached_notes = cache.get(cache_key)
 
@@ -126,21 +168,26 @@ class NoteListCreateAPIView(APIView):
 
         notes = Note.objects.filter(
             user=request.user
-        )
+        ).order_by("-created_at")
+
+        paginator = NotePagination()
+        page = paginator.paginate_queryset(notes, request)
 
         serializer = NoteSerializer(
-            notes,
+            page,
             many=True
         )
 
+        response_data = paginator.get_paginated_response(serializer.data).data
+
         cache.set(
             cache_key,
-            serializer.data,
+            response_data,
             timeout=300
         )
 
         return Response(
-            serializer.data,
+            response_data,
             status=status.HTTP_200_OK
         )
 
@@ -200,8 +247,15 @@ class NoteListCreateAPIView(APIView):
                 user=request.user
             )
 
-            cache_key = f"notes:user:{request.user.id}"
-            cache.delete(cache_key)
+            cache_version_key = f"notes:version:user:{request.user.id}"
+
+            version = cache.get(cache_version_key, 1)
+
+            cache.set(
+                cache_version_key,
+                version + 1,
+                timeout=None
+            )
 
             return Response(
                 serializer.data,
@@ -291,8 +345,15 @@ class NoteDetailAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
 
-            cache_key = f"notes:user:{request.user.id}"
-            cache.delete(cache_key)
+            cache_version_key = f"notes:version:user:{request.user.id}"
+
+            version = cache.get(cache_version_key, 1)
+
+            cache.set(
+                cache_version_key,
+                version + 1,
+                timeout=None
+            )
 
             return Response(
                 serializer.data,
@@ -367,8 +428,15 @@ class NoteDetailAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
 
-            cache_key = f"notes:user:{request.user.id}"
-            cache.delete(cache_key)
+            cache_version_key = f"notes:version:user:{request.user.id}"
+
+            version = cache.get(cache_version_key, 1)
+
+            cache.set(
+                cache_version_key,
+                version + 1,
+                timeout=None
+            )
 
             return Response(
                 serializer.data,
@@ -409,8 +477,15 @@ class NoteDetailAPIView(APIView):
 
         note.delete()
 
-        cache_key = f"notes:user:{request.user.id}"
-        cache.delete(cache_key)
+        cache_version_key = f"notes:version:user:{request.user.id}"
+
+        version = cache.get(cache_version_key, 1)
+
+        cache.set(
+            cache_version_key,
+            version + 1,
+            timeout=None
+        )
 
         return Response(
             status=status.HTTP_204_NO_CONTENT
@@ -727,3 +802,22 @@ class ResetPasswordAPIView(APIView):
             {'message': 'Password reset successfully.'},
             status=status.HTTP_200_OK
         )
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+
+    serializer_class = CustomTokenObtainPairSerializer
+
+    @extend_schema(
+        examples=[
+            OpenApiExample(
+                'Login Request',
+                value={
+                    'username': 'sushant',
+                    'password': 'sushant@1234'
+                },
+                request_only=True,
+            ),
+        ]
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
